@@ -2,12 +2,11 @@ const https = require('https');
 const fs = require('fs');
 const winston = require('winston');
 
-const url = 'https://server4info0.site/com/cum.txt';
+const url = 'https://link';
 const telegramToken = '7265284412:AAH0G6BW85J3JaYgZDSa9rDyJG80YTdBaEU';
 const chatId = '5845506396';
 const previousContentFile = 'previousContent.txt';
 
-// Set up logging with winston
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -22,7 +21,6 @@ const logger = winston.createLogger({
     ]
 });
 
-// Function to send a message to Telegram
 function sendTelegramMessage(message) {
     const telegramUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
@@ -37,7 +35,6 @@ function sendTelegramMessage(message) {
     });
 }
 
-// Function to fetch content from the URL
 function fetchContent() {
     https.get(url, (res) => {
         let data = '';
@@ -54,7 +51,6 @@ function fetchContent() {
     });
 }
 
-// Function to check for changes
 function checkForChanges(newContent) {
     fs.readFile(previousContentFile, 'utf8', (err, oldContent) => {
         if (err && err.code !== 'ENOENT') {
@@ -62,12 +58,10 @@ function checkForChanges(newContent) {
             return;
         }
 
-        // Compare old content with new content
         if (oldContent !== newContent) {
             logger.info('Content changed, sending update to Telegram.');
             sendTelegramMessage(newContent);
             
-            // Update the previous content file
             fs.writeFile(previousContentFile, newContent, (err) => {
                 if (err) {
                     logger.error(`Error writing new content: ${err.message}`);
@@ -77,9 +71,7 @@ function checkForChanges(newContent) {
     });
 }
 
-// Send initial message to confirm webhook is active
-sendTelegramMessage(`Webhook monitoring has started. Monitoring the content at ${url}.`);
+sendTelegramMessage(`Webhook monitoring has started. Monitoring content at ${url}.`);
 
-// Start monitoring and log status
 logger.info('Webhook monitoring started. Fetching content every second...');
 setInterval(fetchContent, 1000);
